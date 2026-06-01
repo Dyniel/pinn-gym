@@ -1,0 +1,81 @@
+# pinn-gym default configuration
+#
+# Every field is documented in docs/CONFIG.md. This file is the canonical
+# reference: copy it as a starting point and override the few fields you
+# actually want to change.
+#
+# A YAML config drives the whole pipeline:
+#
+#   pinn-gym run configs/default.yaml
+#
+# Stages run in the order listed under run.stages.
+
+run:
+  name: default                       # → runs/default_<timestamp>/
+  seed: 20260520
+  stages: [build, train, evaluate, plots, audit]
+  device: cuda                        # cuda | cpu
+  # output_root: /absolute/path       # uncomment to write outside <repo>/runs
+
+materials:
+  presets: [pa12, pla, petg, tpu, pa_cf]
+  material_aware_crush_target: true   # per-material feasibility gate (recommended)
+  custom_cards: []                    # optional: paths to extra material JSON cards
+
+candidate_pool:                       # material-aware sampler + declared oracle
+  train_n: 4000
+  eval_n:  1200
+  layers: 96
+  steps: 320
+  max_displacement_mm: 50.0
+  oracle_workers: 0                   # 0 = auto (min(cpu_count, 8))
+  dynamic_amplification: 1.16
+  yield_scale: 0.08
+  fixture_peak_force_limit_n: 3500.0
+  target_min_crush_mm: 40.0           # only used if material_aware_crush_target=false
+
+train:                                # PINN + baselines
+  methods: [pinn_full, pinn_energy, mlp_softplus]
+  pooled: true                        # also train one pooled multi-material model
+  epochs: 200
+  batch_size: 1024
+  rows_per_material: 50000
+  hidden_dim: 256
+  blocks: 4
+  lr: 1.0e-3
+  weight_decay: 1.0e-5
+  loss_weights:
+    boundary: 0.5
+    energy:   1.0
+    peak:     0.2
+    monotonicity: 0.5
+    smoothness:   0.1
+  peak_soft_bound: 1.05
+  monotonic_strain_after: 0.05
+
+evaluate:                             # ranking, transfer matrix
+  precision_ks: [1, 3, 5, 10, 25, 50]
+  target_energy_j: auto               # "auto" = oracle IMPACT_ENERGY_J
+  peak_limit_n: 3500.0
+  min_crush_mm: 40.0
+  curve_limit_mm: 40.0
+  include_transfer_matrix: true
+
+plots:
+  formats: [pdf, png]
+  figures:
+    - curves_overlay
+    - nrmse_distribution
+    - energy_error
+    - violation_bars
+    - precision_at_k
+    - regret_at_k
+    - robustness_survival
+  dpi: 150
+
+audit:                                # mesh watertightness + envelope
+  stl_export_count: 3
+  stl_backend: voxel                  # voxel | implicit
+  stl_resolution: 144
+  stl_format: binary
+  warn_only: false

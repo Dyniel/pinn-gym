@@ -1,0 +1,84 @@
+# Scientific Reports paper run — material-agnostic, publishable.
+#
+# This is the canonical configuration behind the figures and tables in the
+# manuscript. Reproduces the per-material candidate pools, PINN training,
+# evaluation, transfer matrix, plots, and STL audit.
+#
+# Expected resources:
+#   build      ~12h on 16 CPU cores      (CPU-bound, embarrassingly parallel)
+#   train      ~2-4h per material on A100 (run via Slurm array, one task per material)
+#   evaluate   ~30 min on A100
+#   plots      < 5 min on CPU
+#   audit      < 5 min on CPU
+#
+# Submit with the bundled Slurm template:
+#
+#   sbatch slurm/pinn_gym.slurm configs/sr_full.yaml
+
+run:
+  name: sr_full
+  seed: 20260520
+  stages: [build, train, evaluate, plots, audit]
+  device: cuda
+
+materials:
+  presets: [pa12, pla, petg, tpu, pa_cf]
+  material_aware_crush_target: true   # critical for non-PA12 cards to have feasible examples
+
+candidate_pool:
+  train_n: 100000
+  eval_n:   25000
+  layers: 96
+  steps: 320
+  max_displacement_mm: 50.0
+  oracle_workers: 16
+  dynamic_amplification: 1.16
+  yield_scale: 0.08
+  fixture_peak_force_limit_n: 3500.0
+  target_min_crush_mm: 40.0
+
+train:
+  methods: [pinn_full, pinn_energy, mlp_softplus, pseudo_bootstrap, lightest, random]
+  pooled: true
+  epochs: 200
+  batch_size: 1024
+  rows_per_material: 50000
+  hidden_dim: 256
+  blocks: 4
+  lr: 1.0e-3
+  weight_decay: 1.0e-5
+  loss_weights:
+    boundary: 0.5
+    energy:   1.0
+    peak:     0.2
+    monotonicity: 0.5
+    smoothness:   0.1
+  peak_soft_bound: 1.05
+  monotonic_strain_after: 0.05
+
+evaluate:
+  precision_ks: [1, 3, 5, 10, 25, 50]
+  target_energy_j: auto
+  peak_limit_n: 3500.0
+  min_crush_mm: 40.0
+  curve_limit_mm: 40.0
+  include_transfer_matrix: true
+
+plots:
+  formats: [pdf, png]
+  figures:
+    - curves_overlay
+    - nrmse_distribution
+    - energy_error
+    - violation_bars
+    - precision_at_k
+    - regret_at_k
+    - robustness_survival
+  dpi: 300                            # journal-quality
+
+audit:
+  stl_export_count: 3
+  stl_backend: voxel
+  stl_resolution: 144
+  stl_format: binary
+  warn_only: false

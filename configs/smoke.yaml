@@ -1,0 +1,61 @@
+# Smoke configuration — ~5 minutes on a laptop CPU.
+#
+# Use this to verify the install and the CLI surface end-to-end:
+#
+#   pinn-gym validate configs/smoke.yaml
+#   pinn-gym run configs/smoke.yaml
+#
+# This is NOT a publishable run. Pool sizes and epoch counts are intentionally
+# tiny so the pipeline finishes fast without GPU.
+
+run:
+  name: smoke
+  seed: 0
+  stages: [build, train, evaluate, plots]
+  device: cpu
+
+materials:
+  presets: [pa12]                     # single material keeps the smoke fast
+  material_aware_crush_target: true
+
+candidate_pool:
+  train_n: 200
+  eval_n: 60
+  layers: 24
+  steps: 80
+  max_displacement_mm: 50.0
+  oracle_workers: 1                   # deterministic for CI
+
+train:
+  methods: [mlp_softplus, pinn_energy]
+  pooled: false
+  epochs: 5
+  batch_size: 32
+  rows_per_material: 200
+  hidden_dim: 64
+  blocks: 2
+  lr: 1.0e-3
+  weight_decay: 0.0
+  loss_weights:
+    boundary: 0.5
+    energy:   1.0
+    peak:     0.2
+    monotonicity: 0.0
+    smoothness:   0.0
+
+evaluate:
+  precision_ks: [1, 5]
+  target_energy_j: auto
+  peak_limit_n: 3500.0
+  min_crush_mm: 30.0
+  curve_limit_mm: 40.0
+  include_transfer_matrix: false
+
+plots:
+  formats: [png]
+  figures: [curves_overlay, nrmse_distribution]
+  dpi: 100
+
+audit:
+  stl_export_count: 0                 # skip STL audit in smoke
+  warn_only: true

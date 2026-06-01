@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use pinn-gym, please cite this repository and the archived release."
+title: "pinn-gym: a reproducible numerical gym for physics-informed lattice design"
+version: "0.1.0"
+date-released: 2026-06-01
+repository-code: "https://github.com/Dyniel/pinn-gym"
+license: MIT
+authors:
+  - family-names: Cieslak
+    given-names: Daniel
+    email: cieslak.a.daniel@gmail.com
+keywords:
+  - physics-informed neural networks
+  - lattice metamaterials
+  - energy absorption
+  - reproducible benchmark

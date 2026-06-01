@@ -1,0 +1,11 @@
+{
+  "preset": "pa12",
+  "train_rows": 6,
+  "eval_rows": 3,
+  "train_feasible": 4,
+  "eval_feasible": 2,
+  "train_feasible_rate": 0.667,
+  "eval_feasible_rate": 0.667,
+  "target_min_crush_mm_effective": 40.0,
+  "note": "Hand-written dummy data. Not for scientific use."
+}

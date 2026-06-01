@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.python-version
+
+# Type checkers / linters
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project data — large, never commit. See data/README.md for download steps.
+data/raw/
+data/processed/
+data/extracted/
+!data/dummy/
+!data/README.md
+!data/dummy/**
+
+# Run outputs — every invocation writes here. See docs/PIPELINE.md.
+runs/*
+!runs/.gitkeep
+simulations/generated/
+simulations/results/
+simulations/runs/
+
+# Slurm / cluster scratch
+*.out
+*.err
+slurm-*.out
+logs/
+
+# Checkpoints / large model artifacts
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+*.onnx
+
+# STL exports (large binaries)
+*.stl
+
+# Local release assembly area.
+pinn_gym_release_assets/
+*.tar
+*.tar.zst
+*.tar.zst.part*
+FULL_DUMP_SHA256SUMS
+FULL_DUMP_MANIFEST.tsv
+
+# Editor scratch
+*~
+*.bak
+*.tmp
